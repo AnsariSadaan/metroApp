@@ -4,6 +4,7 @@ import { metroData } from "../helper/metroData.js";
 
 
 const Dashboard = () => {
+  const [selectedLine, setSelectedLine] = useState('')
   const [source, setSource] = useState("");
   const [destination, setDestination] = useState("");
   const [price, setPrice] = useState(0);
@@ -17,13 +18,20 @@ const Dashboard = () => {
       window.location.href = "/login";
     }
 
-    const allStations = metroData.lines.reduce((acc, line) => {
-      return acc.concat(line.stations);
-    }, []);
+    if (selectedLine) {
+      const lineData = metroData.lines.find((line) => line.line === selectedLine);
+      setStations(lineData ? lineData.stations : []);
+    } else {
+      setStations([]);
+    }
+  }, [selectedLine]);
 
-    setStations([...new Set(allStations)]);
+    // const allStations = metroData.lines.reduce((acc, line) => {
+    //   return acc.concat(line.stations);
+    // }, []);
+
+    // setStations([...new Set(allStations)]);
     
-  }, []);
 
   const calculatePrice = () => {
     const sourceIndex = stations.indexOf(source);
@@ -50,6 +58,7 @@ const Dashboard = () => {
       setSuccess(`Payment successful! Ticket Token: ${response.data.ticket.ticketToken}`);
       setError("");
       setSource("");
+      setSelectedLine("");
       setDestination("");
       setPrice(0);
     } catch (err) {
@@ -61,6 +70,23 @@ const Dashboard = () => {
   return (
     <div className="mt-6 p-6 max-w-lg mx-auto bg-white shadow-md rounded-lg">
       <h1 className="text-2xl font-bold mb-6 text-center">Book Tickets</h1>
+
+      <div className="mb-4">
+        <label className="block text-gray-700 mb-2">Select Line:</label>
+        <select
+          className="w-full border border-gray-300 rounded px-3 py-2"
+          value={selectedLine}
+          onChange={(e) => setSelectedLine(e.target.value)}
+        >
+          <option value="">Select Line</option>
+          {metroData.lines.map((line) => (
+            <option key={line.line} value={line.line}>
+              {line.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <div className="mb-4">
         <label className="block text-gray-700 mb-2">Select Source:</label>
         <select
